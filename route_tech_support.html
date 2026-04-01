@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Route Tech Support</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;padding:16px;color:#111}
+.wrap{max-width:560px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;border:1px solid #e0e0e0}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #eee}
+.logo{width:32px;height:32px;border-radius:6px;background:#e8f0fe;display:flex;align-items:center;justify-content:center}
+.logo svg{width:18px;height:18px;stroke:#1a73e8;fill:none;stroke-width:2}
+.title{font-size:16px;font-weight:600;color:#111}
+.sub{font-size:12px;color:#666}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;margin-bottom:1.25rem;flex-wrap:wrap}
+.breadcrumb span{color:#111;font-weight:600}
+.bc-sep{opacity:0.4}
+.section-label{font-size:11px;font-weight:600;color:#999;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.btn-grid{display:grid;gap:8px}
+.btn-grid.cols2{grid-template-columns:1fr 1fr}
+.btn{background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;transition:background 0.12s;width:100%}
+.btn:hover{background:#f9f9f9}
+.btn:active{transform:scale(0.99)}
+.btn .btn-icon{font-size:20px;margin-bottom:6px;display:block}
+.btn .btn-label{font-size:14px;font-weight:600;color:#111;display:block}
+.btn .btn-desc{font-size:12px;color:#666;margin-top:2px;display:block}
+.btn.success{border-color:#34a853;background:#f0faf4}
+.btn.success .btn-label{color:#1e7e34}
+.btn.danger{border-color:#ea4335;background:#fef3f2}
+.btn.danger .btn-label{color:#c5221f}
+.btn.warn{border-color:#fbbc04;background:#fffde7}
+.btn.warn .btn-label{color:#b06000}
+.btn.slack-btn{border-color:#4A154B;background:#f8f0f8}
+.btn.slack-btn .btn-label{color:#4A154B}
+.back-btn{background:none;border:none;cursor:pointer;font-size:13px;color:#666;padding:0 0 1rem;display:flex;align-items:center;gap:4px}
+.back-btn:hover{color:#111}
+.steps{margin:0 0 1.25rem;display:flex;flex-direction:column;gap:8px}
+.step{background:#f8f8f8;border-radius:8px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.step-num{width:22px;height:22px;border-radius:50%;background:#e8e8e8;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#555;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:#222;line-height:1.5}
+.step-text strong{font-weight:600}
+.outcome-label{font-size:11px;font-weight:600;color:#999;letter-spacing:0.08em;text-transform:uppercase;margin:1rem 0 8px}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
+.badge-info{background:#e8f0fe;color:#1a73e8}
+.badge-warn{background:#fffde7;color:#b06000}
+.zd-box{background:#f8f8f8;border:1px solid #ddd;border-radius:8px;padding:14px 16px;margin-bottom:12px}
+.zd-box .zd-title{font-size:11px;font-weight:600;color:#666;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em}
+.zd-field{margin-bottom:8px}
+.zd-field label{font-size:11px;color:#666;display:block;margin-bottom:3px}
+.zd-field input{width:100%;padding:7px 10px;font-size:13px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#111}
+.zd-field input:focus{outline:none;border-color:#1a73e8}
+.zd-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slack-card{border:1px solid #4A154B;border-radius:8px;padding:12px 14px;background:#f8f0f8;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px}
+.slack-icon{font-size:20px;flex-shrink:0}
+.slack-card .sc-label{font-size:12px;font-weight:600;color:#4A154B;margin-bottom:2px}
+.slack-card .sc-desc{font-size:12px;color:#7a3f7c}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+    </div>
+    <div>
+      <div class="title">Route Tech Support</div>
+      <div class="sub">EGM &amp; Kiosk Troubleshooting</div>
+    </div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+const S = { screen:'home', trail:[], meta:{} };
+
+function zendeskForm(issueType, deviceType) {
+  return `
+    <div class="zd-box">
+      <div class="zd-title">Zendesk Ticket — collect before creating</div>
+      <div class="zd-row">
+        <div class="zd-field"><label>Machine / Asset ID</label><input type="text" placeholder="e.g. EGM-0042"/></div>
+        <div class="zd-field"><label>Venue / Location</label><input type="text" placeholder="Venue name"/></div>
+      </div>
+      <div class="zd-row">
+        <div class="zd-field"><label>Caller name</label><input type="text" placeholder="Caller name"/></div>
+        <div class="zd-field"><label>Caller contact</label><input type="text" placeholder="Phone or ext."/></div>
+      </div>
+      <div class="zd-field"><label>Issue summary</label><input type="text" value="${issueType} — remote reboot attempted, unresolved. ${deviceType} out of service."/></div>
+      <div class="zd-field"><label>Steps already taken</label><input type="text" value="Remote reboot performed — issue persisted. Technician dispatch required."/></div>
+    </div>`;
+}
+
+function rebootFlow({badge, note, steps, yesLabel, noLabel, yesScreen, noScreen, issueType, deviceType}) {
+  const stepsHtml = steps.map((s,i) => `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('');
+  return `
+    <div style="margin-bottom:12px"><span class="badge badge-info">${badge}</span></div>
+    <p style="font-size:13px;color:#666;margin-bottom:1rem">${note}</p>
+    <div class="steps">${stepsHtml}</div>
+    <div class="outcome-label">Did the remote reboot resolve the issue?</div>
+    <div class="btn-grid cols2">
+      <button class="btn success" onclick="go('${yesScreen}',{})"><span class="btn-label">${yesLabel}</span></button>
+      <button class="btn danger" onclick="go('${noScreen}',{issueType:'${issueType}',deviceType:'${deviceType}'})"><span class="btn-label">${noLabel}</span></button>
+    </div>`;
+}
+
+function resolvedScreen(title, note) {
+  return `
+    <div style="text-align:center;padding:1.5rem 0 1rem">
+      <div style="width:48px;height:48px;border-radius:50%;background:#f0faf4;border:1px solid #34a853;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px">✓</div>
+      <div style="font-size:16px;font-weight:600;color:#1e7e34;margin-bottom:6px">${title}</div>
+    </div>
+    <div class="step" style="margin-bottom:1rem"><div class="step-text" style="font-size:13px">${note}</div></div>
+    <button class="btn" onclick="go('home',{})"><span class="btn-label">New call — return to home</span></button>`;
+}
+
+function dispatchScreen(title, note, issueType, deviceType) {
+  return `
+    <div style="text-align:center;padding:1rem 0 0.5rem">
+      <div style="width:48px;height:48px;border-radius:50%;background:#fef3f2;border:1px solid #ea4335;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px">!</div>
+      <div style="font-size:15px;font-weight:600;color:#c5221f;margin-bottom:4px">${title}</div>
+      <p style="font-size:12px;color:#666;margin-bottom:1rem">${note}</p>
+    </div>
+    ${zendeskForm(issueType || 'Device issue', deviceType || 'Device')}
+    <div class="outcome-label">Next steps</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">Fill in all fields above, then <strong>create the Zendesk ticket</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Assign the ticket</strong> to the correct technician based on their route in Zendesk.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Advise the caller</strong> a technician has been assigned and will attend site.</div></div>
+    </div>
+    <button class="btn" onclick="go('home',{})" style="margin-top:0.5rem"><span class="btn-label">New call — return to home</span></button>`;
+}
+
+const screens = {
+  home: () => `
+    <div class="section-label">Select device type</div>
+    <div class="btn-grid cols2">
+      <button class="btn" onclick="go('egm',{label:'EGM'})">
+        <span class="btn-icon">🎰</span>
+        <span class="btn-label">EGM</span>
+        <span class="btn-desc">Electronic Gaming Machine</span>
+      </button>
+      <button class="btn" onclick="go('kiosk',{label:'Kiosk'})">
+        <span class="btn-icon">💳</span>
+        <span class="btn-label">Self-Pay Kiosk</span>
+        <span class="btn-desc">TiTo ticket redemption</span>
+      </button>
+    </div>`,
+
+  egm: () => `
+    <div class="section-label">Select issue category</div>
+    <div class="btn-grid">
+      <button class="btn" onclick="go('bill_acceptor',{label:'Bill Acceptor'})">
+        <span class="btn-label">💵  Bill Acceptor</span>
+        <span class="btn-desc">Not taking money, not taking tickets, or offline</span>
+      </button>
+      <button class="btn" onclick="go('printer',{label:'Printer'})">
+        <span class="btn-label">🖨️  Printer</span>
+        <span class="btn-desc">No ticket, ripped ticket, out of paper, or offline</span>
+      </button>
+      <button class="btn" onclick="go('frozen',{label:'Machine Frozen'})">
+        <span class="btn-label">🔒  Machine Frozen</span>
+        <span class="btn-desc">Touchscreen / machine locked, player cannot play</span>
+      </button>
+      <button class="btn warn" onclick="go('no_internet',{label:'No Internet'})">
+        <span class="btn-label">📡  No Internet</span>
+        <span class="btn-desc">Machine unreachable remotely</span>
+      </button>
+      <button class="btn slack-btn" onclick="go('vlid',{label:'VLID Issue'})">
+        <span class="btn-label">⚠️  VLID Issue</span>
+        <span class="btn-desc" style="color:#7a3f7c">Contact AXES via Slack</span>
+      </button>
+    </div>`,
+
+  kiosk: () => `
+    <div class="section-label">Select issue</div>
+    <div class="btn-grid">
+      <button class="btn" onclick="go('kiosk_money',{label:'Out of Money'})">
+        <span class="btn-label">💰  Kiosk out of money</span>
+        <span class="btn-desc">Insufficient funds to pay out customer</span>
+      </button>
+      <button class="btn" onclick="go('kiosk_ticket',{label:&quot;Won\'t Take Ticket&quot;})">
+        <span class="btn-label">🎫  Won't accept ticket</span>
+        <span class="btn-desc">TiTo ticket reader rejecting or not reading</span>
+      </button>
+    </div>`,
+
+  bill_acceptor: () => `
+    <div class="section-label">Bill Acceptor — select specific issue</div>
+    <div class="btn-grid">
+      <button class="btn" onclick="go('ba_money',{label:'Not Taking Money'})">
+        <span class="btn-label">Not taking money</span>
+        <span class="btn-desc">Bills being rejected or not feeding</span>
+      </button>
+      <button class="btn" onclick="go('ba_ticket',{label:'Not Taking Tickets'})">
+        <span class="btn-label">Not taking tickets</span>
+        <span class="btn-desc">TiTo vouchers rejected or unread</span>
+      </button>
+      <button class="btn" onclick="go('ba_offline',{label:'Not Online'})">
+        <span class="btn-label">Not online / offline</span>
+        <span class="btn-desc">Bill acceptor not communicating with machine</span>
+      </button>
+    </div>`,
+
+  printer: () => `
+    <div class="section-label">Printer — select specific issue</div>
+    <div class="btn-grid cols2">
+      <button class="btn" onclick="go('pr_no_ticket',{label:'No Ticket Printed'})">
+        <span class="btn-label">No ticket printed</span>
+        <span class="btn-desc">Player pressed cashout, no ticket issued</span>
+      </button>
+      <button class="btn" onclick="go('pr_ripped',{label:'Ticket Ripped'})">
+        <span class="btn-label">Ticket ripped</span>
+        <span class="btn-desc">Partial or damaged ticket dispensed</span>
+      </button>
+      <button class="btn" onclick="go('pr_paper',{label:'Out of Paper'})">
+        <span class="btn-label">Out of paper</span>
+        <span class="btn-desc">Printer paper empty, needs refill</span>
+      </button>
+      <button class="btn" onclick="go('pr_offline',{label:'Printer Offline'})">
+        <span class="btn-label">Printer offline</span>
+        <span class="btn-desc">Not communicating with machine</span>
+      </button>
+    </div>`,
+
+  frozen: () => rebootFlow({badge:'Machine Frozen',note:'Player is stuck — touchscreen unresponsive.',steps:['<strong>Acknowledge the player</strong> — ask them to step back from the machine.','<strong>Locate the machine</strong> in your management system by asset ID or location.','<strong>Initiate remote restart</strong> via your management console. Resolves ~9 out of 10 cases.'],yesLabel:'Restart worked — player can play',noLabel:'Restart did not work',yesScreen:'resolved_frozen',noScreen:'dispatch_egm',issueType:'Machine Frozen',deviceType:'EGM'}),
+  ba_money: () => rebootFlow({badge:'Bill Acceptor',note:'Bill acceptor is rejecting or not reading banknotes.',steps:['<strong>Confirm the issue</strong> — ask caller what denomination and how many attempts.','<strong>Check for any error codes</strong> on machine display or in your management system.','<strong>Initiate remote reboot</strong> via your management console.'],yesLabel:'Acceptor now taking money',noLabel:'Still not accepting money',yesScreen:'resolved_generic',noScreen:'dispatch_egm',issueType:'Bill Acceptor — not taking money',deviceType:'EGM'}),
+  ba_ticket: () => rebootFlow({badge:'Bill Acceptor',note:'TiTo vouchers being rejected by bill acceptor.',steps:['<strong>Confirm ticket condition</strong> — barcode visible and undamaged?','<strong>Check management system</strong> for any ticket validator errors or alerts.','<strong>Initiate remote reboot</strong> of the machine.'],yesLabel:'Acceptor reading tickets',noLabel:'Still not reading tickets',yesScreen:'resolved_generic',noScreen:'dispatch_egm',issueType:'Bill Acceptor — not taking tickets',deviceType:'EGM'}),
+  ba_offline: () => rebootFlow({badge:'Bill Acceptor Offline',note:'Bill acceptor not communicating with EGM.',steps:['<strong>Verify offline status</strong> in management system.','<strong>Ask on-site staff</strong> to check for any visible mechanical jam at the acceptor face.','<strong>Initiate remote reboot</strong> of the machine.'],yesLabel:'Acceptor back online',noLabel:'Still offline after reboot',yesScreen:'resolved_generic',noScreen:'dispatch_egm',issueType:'Bill Acceptor — offline',deviceType:'EGM'}),
+  pr_no_ticket: () => rebootFlow({badge:'Printer',note:'Player cashed out but no ticket was dispensed.',steps:['<strong>Note machine ID, time, and credit amount</strong> — needed for the reprint.','<strong>Check paper status</strong> in management system — confirm not out of paper.','<strong>Initiate remote reboot</strong> of the machine.','<strong>If resolved:</strong> reprint the ticket at the kiosk using your management system.'],yesLabel:'Resolved — reprinting at kiosk',noLabel:'Reboot did not resolve',yesScreen:'resolved_reprint',noScreen:'dispatch_egm',issueType:'Printer — no ticket dispensed',deviceType:'EGM'}),
+  pr_ripped: () => rebootFlow({badge:'Printer',note:'Ticket dispensed but partially torn or damaged.',steps:['<strong>Ask caller to retain both ticket pieces</strong> — needed for verification.','<strong>Retrieve ticket value</strong> via management system using machine ID + time.','<strong>Initiate remote reboot</strong>, then reprint at kiosk.'],yesLabel:'Reprinted at kiosk successfully',noLabel:'Could not reprint',yesScreen:'resolved_reprint',noScreen:'dispatch_egm',issueType:'Printer — ripped ticket',deviceType:'EGM'}),
+
+  pr_paper: () => `
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Confirm out-of-paper status</strong> in your management system.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Check if venue staff can refill</strong> — do they have paper stock and machine key access?</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">If no paper on site or no access — <strong>create a Zendesk ticket and assign to route technician.</strong></div></div>
+    </div>
+    <div class="outcome-label">Outcome</div>
+    <div class="btn-grid cols2">
+      <button class="btn success" onclick="go('resolved_generic',{})"><span class="btn-label">Venue staff refilled — resolved</span></button>
+      <button class="btn danger" onclick="go('dispatch_egm',{issueType:'Printer — out of paper',deviceType:'EGM'})"><span class="btn-label">Dispatch technician</span></button>
+    </div>`,
+
+  pr_offline: () => rebootFlow({badge:'Printer Offline',note:'Printer not communicating with the EGM.',steps:['<strong>Confirm offline status</strong> in management system.','<strong>Check paper level</strong> — paper-out can cause offline status.','<strong>Initiate remote reboot</strong> of the machine.'],yesLabel:'Printer back online',noLabel:'Still offline',yesScreen:'resolved_generic',noScreen:'dispatch_egm',issueType:'Printer — offline',deviceType:'EGM'}),
+
+  no_internet: () => `
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Machine is unreachable remotely.</strong> You cannot control this machine until connectivity is restored.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Contact venue staff on site</strong> — ask them to check power and display indicators on the machine.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Check if other machines at the same venue are offline</strong> — if so, likely a router or ISP issue.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Guide venue staff</strong> to power-cycle the local router/modem if accessible and all machines are down.</div></div>
+    </div>
+    <div class="outcome-label">Outcome</div>
+    <div class="btn-grid cols2">
+      <button class="btn success" onclick="go('resolved_internet',{})"><span class="btn-label">Machine came back online</span></button>
+      <button class="btn danger" onclick="go('dispatch_egm',{issueType:'No Internet — machine unreachable',deviceType:'EGM'})"><span class="btn-label">Cannot restore — dispatch tech</span></button>
+    </div>`,
+
+  vlid: () => `
+    <div class="slack-card">
+      <span class="slack-icon">#</span>
+      <div>
+        <div class="sc-label">Open the AXES Slack channel and post the details below</div>
+        <div class="sc-desc">AXES support handles all VLID issues — do not attempt to fix remotely without their guidance.</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Note the machine ID, location, and exact VLID error</strong> shown on screen before messaging.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Post in the AXES Slack channel</strong> — include machine ID, venue, VLID error code, and time of occurrence.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Follow AXES technician guidance</strong> — they will direct next steps.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>If AXES also requires a site visit</strong> — create a Zendesk ticket and assign to the route technician.</div></div>
+    </div>
+    <div class="outcome-label">Outcome</div>
+    <div class="btn-grid cols2">
+      <button class="btn success" onclick="go('resolved_generic',{})"><span class="btn-label">AXES resolved via Slack</span></button>
+      <button class="btn danger" onclick="go('dispatch_egm',{issueType:'VLID issue — AXES engaged via Slack, site visit also needed',deviceType:'EGM'})"><span class="btn-label">Site visit also needed</span></button>
+    </div>`,
+
+  kiosk_money: () => `
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Confirm kiosk cash level</strong> in your management system.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Inform the customer</strong> the kiosk is temporarily out of funds and a technician is being dispatched.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Advise venue staff</strong> of the situation so they can assist the customer in the meantime.</div></div>
+    </div>
+    <div class="outcome-label">Resolution</div>
+    <button class="btn danger" onclick="go('dispatch_kiosk',{issueType:'Kiosk out of money',deviceType:'Self-Pay Kiosk'})"><span class="btn-label">Create Zendesk ticket — dispatch technician</span></button>`,
+
+  kiosk_ticket: () => `
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Ask the customer to check the ticket</strong> — barcode clean, unfolded, and undamaged?</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Check for kiosk alerts</strong> in management system — reader errors or jam conditions?</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Try an alternate kiosk</strong> at the same venue if one is available.</div></div>
+    </div>
+    <div class="outcome-label">Outcome</div>
+    <div class="btn-grid cols2">
+      <button class="btn success" onclick="go('resolved_generic',{})"><span class="btn-label">Alternate kiosk worked</span></button>
+      <button class="btn danger" onclick="go('dispatch_kiosk',{issueType:'Kiosk — ticket reader fault',deviceType:'Self-Pay Kiosk'})"><span class="btn-label">Dispatch technician</span></button>
+    </div>`,
+
+  resolved_generic: () => resolvedScreen('Issue resolved remotely.','No Zendesk ticket needed. Note the machine ID, issue, remote reboot outcome, and call time in your logs.'),
+  resolved_frozen: () => resolvedScreen('Machine restarted — player can resume.','Advise the player the machine is back up. Log: machine ID, frozen event, remote restart, resolved. No Zendesk ticket needed.'),
+  resolved_reprint: () => resolvedScreen('Ticket reprinted at kiosk.','Confirm customer received the ticket. Log: machine ID, print issue, remote reboot, kiosk reprint performed. No Zendesk ticket needed.'),
+  resolved_internet: () => resolvedScreen('Machine back online.','Confirm machine is visible in management system. Log: machine ID, location, connectivity loss and recovery method. No Zendesk ticket needed.'),
+
+  dispatch_egm: () => { const m=S.meta||{}; return dispatchScreen('Remote resolution unsuccessful — dispatch required.','Fill in the fields below to create the Zendesk ticket.',m.issueType,m.deviceType); },
+  dispatch_kiosk: () => { const m=S.meta||{}; return dispatchScreen('Technician dispatch required.','Fill in the fields below to create the Zendesk ticket.',m.issueType,m.deviceType); },
+};
+
+function go(screen, meta) {
+  if (screen !== 'home') S.trail.push({screen:S.screen,meta:S.meta});
+  else S.trail=[];
+  S.screen=screen; S.meta=meta||{}; render();
+}
+function goBack() {
+  if (!S.trail.length) return;
+  const prev=S.trail.pop(); S.screen=prev.screen; S.meta=prev.meta; render();
+}
+function breadcrumbLabels() {
+  const labels=['Home'];
+  S.trail.forEach(t=>{ if(t.meta&&t.meta.label) labels.push(t.meta.label); });
+  if(S.meta&&S.meta.label&&S.screen!=='home') labels.push(S.meta.label);
+  return labels;
+}
+function render() {
+  const app=document.getElementById('app');
+  const fn=screens[S.screen]; if(!fn) return;
+  const bc=breadcrumbLabels();
+  const bcHtml=bc.map((l,i)=>i<bc.length-1?`${l} <span class="bc-sep">/</span> `:`<span>${l}</span>`).join('');
+  const backBtn=S.screen!=='home'?`<button class="back-btn" onclick="goBack()">← Back</button>`:'';
+  app.innerHTML=`<div class="breadcrumb">${bcHtml}</div>${backBtn}${fn()}`;
+}
+render();
+</script>
+</body>
+</html>
